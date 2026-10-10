@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>리드넘버 앱 체험으로 이동</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       background:#fff;color:#111;text-align:center;padding:24px;box-sizing:border-box}
+  .box{max-width:360px;width:100%}
+  p{color:#555;line-height:1.6;font-size:15px}
+  a.btn{display:block;margin:10px 0;padding:14px;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px}
+  .primary{background:#111;color:#fff}
+  .ghost{border:1px solid #ddd;color:#111}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>페이지를 여는 중이에요</h2>
+  <p>자동으로 열리지 않으면 아래 버튼을 눌러 주세요.</p>
+  <a id="open" class="btn primary" href="#">브라우저에서 열기</a>
+  <a id="chrome" class="btn ghost" href="#">Chrome으로 열기</a>
+  <a id="copy" class="btn ghost" href="#">주소 복사하기</a>
+</div>
+<script>
+  var HOST_PATH = "claude.ai/artifact/Lp9LdRyPRGRKDM6izzvMhS";
+  var WEB = "https://" + HOST_PATH;
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+
+  function androidIntent(pkg) {
+    return "intent://" + HOST_PATH + "#Intent;scheme=https;" + (pkg ? "package=" + pkg + ";" : "") +
+           "S.browser_fallback_url=" + encodeURIComponent(WEB) + ";end";
+  }
+
+  var target = WEB, chrome = WEB;
+
+  if (/KAKAOTALK/i.test(ua)) {
+    // 카카오톡 인앱 브라우저 → 기본 브라우저로 열기
+    target = "kakaotalk://web/openExternal?url=" + encodeURIComponent(WEB);
+  } else if (isIOS) {
+    if (/CriOS/i.test(ua))       target = "googlechromes://" + HOST_PATH;
+    else if (/FxiOS/i.test(ua))  target = "firefox://open-url?url=" + encodeURIComponent(WEB);
+    else if (/EdgiOS/i.test(ua)) target = "microsoft-edge-https://" + HOST_PATH;
+    else if (/Whale/i.test(ua))  target = "whale://" + HOST_PATH;
+    else                         target = "x-safari-https://" + HOST_PATH; // Safari (iOS 17+)
+  } else if (isAndroid) {
+    if (/SamsungBrowser/i.test(ua))   target = androidIntent("com.sec.android.app.sbrowser");
+    else if (/Whale/i.test(ua))       target = androidIntent("com.naver.whale");
+    else if (/Firefox/i.test(ua))     target = androidIntent("org.mozilla.firefox");
+    else if (/EdgA/i.test(ua))        target = androidIntent("com.microsoft.emmx");
+    else                              target = androidIntent("com.android.chrome");
+  }
+
+  if (isIOS) chrome = "googlechromes://" + HOST_PATH;
+  else if (isAndroid) chrome = androidIntent("com.android.chrome");
+
+  document.getElementById("open").href = target;
+  document.getElementById("chrome").href = chrome;
+  document.getElementById("copy").addEventListener("click", function (e) {
+    e.preventDefault();
+    var el = this;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(WEB).then(function () {
+        el.textContent = "복사했어요 — 브라우저 주소창에 붙여넣어 주세요";
+      }, function () { prompt("아래 주소를 복사해 주세요", WEB); });
+    } else { prompt("아래 주소를 복사해 주세요", WEB); }
+  });
+
+  if (isIOS || isAndroid) { setTimeout(function () { location.href = target; }, 300); }
+  else { location.replace(WEB); }
+</script>
+</body>
+</html>
