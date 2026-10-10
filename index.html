@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>리드넘버 페이지로 이동</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       background:#fff;color:#111;text-align:center;padding:24px;box-sizing:border-box}
+  .box{max-width:360px}
+  p{color:#555;line-height:1.6}
+  a.btn{display:block;margin:12px 0;padding:14px;border-radius:12px;text-decoration:none;font-weight:600}
+  .primary{background:#111;color:#fff}
+  .ghost{border:1px solid #ddd;color:#111}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>페이지를 여는 중이에요</h2>
+  <p>자동으로 열리지 않으면 아래 버튼을 눌러 주세요.</p>
+  <a id="chrome" class="btn primary" href="#">Chrome으로 열기</a>
+  <a id="copy" class="btn ghost" href="#">주소 복사하기</a>
+</div>
+<script>
+  var PATH = "claude.ai/artifact/Lp9LdRyPRGRKDM6izzvMhS";
+  var WEB  = "https://" + PATH;
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  var target = WEB;
+  if (isAndroid) {
+    target = "intent://" + PATH + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(WEB) + ";end";
+  } else if (isIOS) {
+    target = "googlechromes://" + PATH;
+  }
+
+  document.getElementById("chrome").href = target;
+  document.getElementById("copy").addEventListener("click", function (e) {
+    e.preventDefault();
+    try { navigator.clipboard.writeText(WEB); this.textContent = "복사했어요 — 브라우저 주소창에 붙여넣어 주세요"; }
+    catch (err) { prompt("아래 주소를 복사해 주세요", WEB); }
+  });
+
+  if (isAndroid || isIOS) { setTimeout(function () { location.href = target; }, 300); }
+  else { location.replace(WEB); }
+</script>
+</body>
+</html>
